@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+fpath=$(realpath $0)
+path=$(dirname $fpath)
+keysdir=$path/../sshkeys
+keyname="nut"
+useradmin="admin"
+clusters=$path/ontap
+if [ ! -d ${keysdir} ]; then
+	mkdir ${keysdir}
+  chmod 700 ${keysdir}
+fi
+if [ ! -f ${keysdir}/${keyname} ]; then
+  ssh-keygen -t rsa -b 2048 -C "" -N "" -f ${keysdir}/${keyname} > /dev/null
+  chown -R nut.nut ${keysdir}
+fi
+if [ ! -f ${clusters} ]; then
+  touch ${clusters}
+  chgrp nut ${clusters}
+fi
+if [ -s ${clusters} ]; then
+  for clstr in $(cat ${clusters})
+  do
+    ssh -o StrictHostKeychecking=no -o NumberOfPasswordPrompts=0 -i ${keysdir}/${keyname} -l ${keyname} ${clstr} version > /dev/null 2>&1
+    if [ $? != 0 ]; then
+      echo -e "The key is not on the cluster.\nPlease provide ${useradmin} password for ${clstr}"
+      pubkey=$(cat ${keysdir}/${keyname}.pub)
+      ssh -o StrictHostKeychecking=no -l ${useradmin} ${clstr} 'security login create -username nut -application ssh -authmethod publickey -role admin;security login publickey create -username nut -publickey "'${pubkey}'"' > /dev/null 2>&1
+    fi
+  done
+else
+  echo "File \"${clusters}\" is empty. Please add cluster IPs/hostnames one per line."
+fi

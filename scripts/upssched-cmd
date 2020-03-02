@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+enotify=no
+email=root@localhost
+case $1 in
+  onbattery)
+    msg="UninterruptiblePowerSupply is On battery"
+    logger -t upssched-cmd "$msg"
+    ;;
+  online)
+    msg="UninterruptiblePowerSupply is back online"
+    logger -t upssched-cmd "$msg"
+    ;;
+  downontap)
+    msg="Halting ONTAP"
+    /etc/nut/scripts/haltontap
+    logger -t upssched-cmd "$msg"
+    ;;
+  *)
+    enotify=no
+    logger -t upssched-cmd "Unrecognized command: $1"
+    ;;
+esac
+if [[ $enotify =~ [Yy][Ee][Ss] ]]; then echo $msg|mail -s "$msg" root; fi

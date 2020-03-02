@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+fpath=$(realpath $0)
+path=$(dirname $fpath)
+keysdir=$path/../sshkeys
+keyname="nut"
+for clstr in $(cat $path/ontap)
+do
+  /usr/bin/ssh -o StrictHostKeychecking=no -o NumberOfPasswordPrompts=0 -i ${keysdir}/${keyname} -l ${keyname} ${clstr} version > /dev/null 2>&1
+  if [ $? == 0 ]; then
+    /usr/bin/ssh -o StrictHostKeychecking=no -i ${keysdir}/${keyname} -l ${keyname} ${clstr} "halt -node * -inhibit-takeover true"
+  else
+    echo "Something went wrong connecting to \"${clstr}\" and/or the ssh key is not working."
+  fi
+done

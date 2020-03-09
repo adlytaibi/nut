@@ -12,7 +12,9 @@ case $1 in
     ;;
   downontap)
     msg="Halting ONTAP"
-    /etc/nut/scripts/haltontap
+    fpath=$(realpath $0)
+    path=$(dirname $fpath)
+    $path/haltontap
     logger -t upssched-cmd "$msg"
     ;;
   *)

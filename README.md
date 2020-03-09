@@ -36,9 +36,9 @@ Configuration
 
   * Note: If you're on CentOS, you may want to symlink to `/etc/nut`
 
-   ```sh
-   # ln -s /etc/ups /etc/nut
-   ```
+    ```sh
+    # ln -s /etc/ups /etc/nut
+    ```
 
 3. Add one or more NetApp ONTAP clusters to `/etc/nut/scripts/ontap` one per line
 
